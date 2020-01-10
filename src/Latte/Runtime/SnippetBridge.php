@@ -14,7 +14,7 @@ namespace Latte\Runtime;
  * Snippet bridge
  * @internal
  */
-interface ISnippetBridge
+interface SnippetBridge
 {
 	function isSnippetMode(): bool;
 
@@ -30,3 +30,6 @@ interface ISnippetBridge
 
 	function renderChildren(): void;
 }
+
+
+class_exists(ISnippetBridge::class);
