@@ -83,6 +83,31 @@ class Helpers
 	}
 
 
+	public static function printFunction(string $name, callable $callback, bool $asProps): string
+	{
+		if (is_string($callback) && strpos($callback, '::')) {
+			$rf = new \ReflectionMethod($callback);
+		} elseif (is_array($callback)) {
+			$rf = new \ReflectionMethod($callback[0], $callback[1]);
+		} elseif (is_object($callback) && !$callback instanceof \Closure) {
+			$rf = new \ReflectionMethod($callback, '__invoke');
+		} else {
+			$rf = new \ReflectionFunction($callback);
+		}
+
+		$params = [];
+		foreach ($rf->getParameters() as $param) {
+			$params[] = ($param->getType() ? $param->getType()->getName() . ' ' : '')
+				. '$' . $param->getName()
+				. ($param->isDefaultValueAvailable() ? ' = ' . preg_replace('#\s#', '', var_export($param->getDefaultValue(), true)) : '');
+		}
+		$type = $rf->getReturnType() ? $rf->getReturnType()->getName() : '';
+		return $asProps
+			? ' * @method ' . ($type ?: 'mixed') . " $name(" . implode(', ', $params) . ')'
+			: "$name(" . implode(', ', $params) . ')' . ($type ? ": $type" : '');
+	}
+
+
 	public static function getType($value): string
 	{
 		if (is_object($value)) {
